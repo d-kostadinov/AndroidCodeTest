@@ -4,9 +4,13 @@ import android.os.Bundle;
 import android.support.v7.app.AppCompatActivity;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
+import android.widget.Toast;
 
+import java.io.IOException;
 import java.util.List;
 
+import retrofit2.Call;
+import retrofit2.Callback;
 import retrofit2.Response;
 
 public class MainActivity extends AppCompatActivity {
@@ -25,8 +29,17 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new EVActivityAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
 
-        final Response<List<CosmonautActivity>> response = MyApplication.getAPIService().getEVList().execute();
-        final List<CosmonautActivity> cosmonautActivityList = response.body();
-        mAdapter.setCosmonautActivityList(cosmonautActivityList);
+        MyApplication.getAPIService().getEVList().enqueue(new Callback<List<CosmonautActivity>>() {
+            @Override
+            public void onResponse(Call<List<CosmonautActivity>> call, Response<List<CosmonautActivity>> response) {
+                final List<CosmonautActivity> cosmonautActivityList = response.body();
+                mAdapter.setCosmonautActivityList(cosmonautActivityList);
+            }
+
+            @Override
+            public void onFailure(Call<List<CosmonautActivity>> call, Throwable t) {
+                Toast.makeText(MainActivity.this, "Error occur while loading data.", Toast.LENGTH_LONG).show();
+            }
+        });
     }
 }
