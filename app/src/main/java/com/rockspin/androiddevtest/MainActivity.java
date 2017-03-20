@@ -19,8 +19,6 @@ public class MainActivity extends AppCompatActivity {
     private RecyclerView mRecyclerView;
     private EVActivityAdapter mAdapter;
 
-    private List<CosmonautData> cosmonautDataList;
-
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
@@ -32,18 +30,25 @@ public class MainActivity extends AppCompatActivity {
         mAdapter = new EVActivityAdapter(this);
         mRecyclerView.setAdapter(mAdapter);
 
-        MyApplication.getAPIService().getEVList().enqueue(new Callback<List<CosmonautData>>() {
-            @Override
-            public void onResponse(Call<List<CosmonautData>> call, Response<List<CosmonautData>> response) {
-                cosmonautDataList = response.body();
-                mAdapter.setCosmonautActivityList(cosmonautDataList);
-            }
 
-            @Override
-            public void onFailure(Call<List<CosmonautData>> call, Throwable t) {
-                Toast.makeText(MainActivity.this, "Error occur while loading data.", Toast.LENGTH_LONG).show();
-            }
-        });
+        if (DataHolder.getInstance().getCosmonautDataList() == null) {
+            MyApplication.getAPIService().getEVList().enqueue(new Callback<List<CosmonautData>>() {
+                @Override
+                public void onResponse(Call<List<CosmonautData>> call, Response<List<CosmonautData>> response) {
+
+                    DataHolder.getInstance().setCosmonautDataList(response.body());
+
+                    mAdapter.setCosmonautActivityList(DataHolder.getInstance().getCosmonautDataList());
+                }
+
+                @Override
+                public void onFailure(Call<List<CosmonautData>> call, Throwable t) {
+                    Toast.makeText(MainActivity.this, "Error occur while loading data.", Toast.LENGTH_LONG).show();
+                }
+            });
+        } else {
+            mAdapter.setCosmonautActivityList(DataHolder.getInstance().getCosmonautDataList());
+        }
 
         findViewById(R.id.fab_change_sorting).setOnClickListener(new View.OnClickListener() {
             @Override
@@ -55,7 +60,7 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void reverseAdapter() {
-        Collections.reverse(cosmonautDataList);
+        Collections.reverse(DataHolder.getInstance().getCosmonautDataList());
 
         mAdapter.notifyDataSetChanged();
     }
