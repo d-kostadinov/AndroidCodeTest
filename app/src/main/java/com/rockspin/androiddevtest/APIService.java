@@ -12,5 +12,5 @@ public interface APIService {
      * @return The Retrofit Call
      */
     @GET("9kcy-zwvn.json?$order=date&$limit=20")
-    Call<List<CosmonautActivity>> getEVList();
+    Call<List<CosmonautData>> getEVList();
 }
